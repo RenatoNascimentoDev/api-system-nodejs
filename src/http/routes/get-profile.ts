@@ -22,6 +22,7 @@ export const getProfileRoute: FastifyPluginCallbackZod = (app) => {
           id: schema.users.id,
           name: schema.users.name,
           email: schema.users.email,
+          avatarUrl: schema.users.avatarUrl,
         })
         .from(schema.users)
         .where(eq(schema.users.id, userId))
@@ -33,13 +34,15 @@ export const getProfileRoute: FastifyPluginCallbackZod = (app) => {
         return reply.status(404).send({ message: 'Usuário não encontrado' })
       }
 
-      let avatarUrl: string | null = null
+      let avatarUrl: string | null = account.avatarUrl ?? null
 
-      try {
-        const avatarPath = join(avatarsDir, `${userId}.txt`)
-        avatarUrl = await fs.readFile(avatarPath, 'utf-8')
-      } catch {
-        avatarUrl = null
+      if (!avatarUrl) {
+        try {
+          const avatarPath = join(avatarsDir, `${userId}.txt`)
+          avatarUrl = await fs.readFile(avatarPath, 'utf-8')
+        } catch {
+          avatarUrl = null
+        }
       }
 
       return {

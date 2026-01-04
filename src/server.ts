@@ -17,6 +17,7 @@ import { createUserRoute } from './http/routes/create-user.ts'
 import { createSessionRoute } from './http/routes/create-session.ts'
 import { getProfileRoute } from './http/routes/get-profile.ts'
 import { uploadAvatarRoute } from './http/routes/upload-avatar.ts'
+import { changePasswordRoute } from './http/routes/change-password.ts'
 
 const app = fastify().withTypeProvider<ZodTypeProvider>()
 
@@ -45,5 +46,6 @@ app.register(createUserRoute)
 app.register(createSessionRoute)
 app.register(getProfileRoute)
 app.register(uploadAvatarRoute)
+app.register(changePasswordRoute)
 
 app.listen({ port: env.PORT })

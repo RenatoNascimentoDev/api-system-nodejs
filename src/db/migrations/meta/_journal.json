@@ -50,6 +50,13 @@
       "when": 1767475105501,
       "tag": "0006_fancy_slayback",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1767501197767,
+      "tag": "0007_harsh_blazing_skull",
+      "breakpoints": true
     }
   ]
 }

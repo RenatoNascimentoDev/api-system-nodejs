@@ -5,6 +5,7 @@ export const users = pgTable('users', {
     name: text().notNull(),
     email: text().notNull().unique(),
     passwordHash: text().notNull(),
+    avatarUrl: text('avatar_url'),
     createdAt: timestamp().defaultNow().notNull(),
     totalRoomsCreated: integer().notNull().default(0),
 })

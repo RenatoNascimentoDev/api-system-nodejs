@@ -16,6 +16,8 @@ const allowedMimes: Record<string, string> = {
 }
 
 export const uploadAvatarRoute: FastifyPluginCallbackZod = (app) => {
+  const MAX_SIZE_BYTES = 5 * 1024 * 1024 // 5MB
+
   app.post(
     '/users/avatar',
     {
@@ -34,6 +36,10 @@ export const uploadAvatarRoute: FastifyPluginCallbackZod = (app) => {
 
       const buffer = await file.toBuffer()
 
+      if (buffer.length > MAX_SIZE_BYTES) {
+        return reply.status(413).send({ message: 'Arquivo excede o limite de 5MB' })
+      }
+
       if (buffer.length === 0) {
         return reply.status(400).send({ message: 'Arquivo vazio' })
       }
@@ -48,10 +54,9 @@ export const uploadAvatarRoute: FastifyPluginCallbackZod = (app) => {
 
       // apenas garante que o usuário existe para consistência
       await db
-        .select({ id: schema.users.id })
-        .from(schema.users)
+        .update(schema.users)
+        .set({ avatarUrl: dataUrl })
         .where(eq(schema.users.id, userId))
-        .limit(1)
 
       return reply.send({ avatarUrl: dataUrl })
     }
