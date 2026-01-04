@@ -1,9 +1,6 @@
-import { compare } from 'bcryptjs'
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod'
-import { eq } from 'drizzle-orm'
 import z from 'zod'
-import { db } from '../../db/connection.ts'
-import { schema } from '../../db/schema/index.ts'
+import { useCases } from '../../config/container.ts'
 
 export const createSessionRoute: FastifyPluginCallbackZod = (app) => {
   app.post(
@@ -19,37 +16,20 @@ export const createSessionRoute: FastifyPluginCallbackZod = (app) => {
     async (request, reply) => {
       const { email, password } = request.body
 
-      const user = await db
-        .select({
-          id: schema.users.id,
-          name: schema.users.name,
-          email: schema.users.email,
-          passwordHash: schema.users.passwordHash,
-        })
-        .from(schema.users)
-        .where(eq(schema.users.email, email))
-        .limit(1)
+      const result = await useCases.createSession.execute({ email, password })
 
-      const account = user[0]
-
-      if (!account) {
+      if (!result.ok) {
         return reply.status(401).send({ message: 'Credenciais inválidas' })
       }
 
-      const isPasswordValid = await compare(password, account.passwordHash)
-
-      if (!isPasswordValid) {
-        return reply.status(401).send({ message: 'Credenciais inválidas' })
-      }
-
-      const token = await reply.jwtSign({ sub: account.id })
+      const token = await reply.jwtSign({ sub: result.value.userId })
 
       return reply.send({
         token,
         user: {
-          id: account.id,
-          name: account.name,
-          email: account.email
+          id: result.value.userId,
+          name: result.value.name,
+          email: result.value.email,
         },
       })
     }

@@ -1,9 +1,6 @@
-import { hash } from 'bcryptjs'
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod'
-import { eq } from 'drizzle-orm'
 import z from 'zod'
-import { db } from '../../db/connection.ts'
-import { schema } from '../../db/schema/index.ts'
+import { useCases } from '../../config/container.ts'
 
 export const createUserRoute: FastifyPluginCallbackZod = (app) => {
   app.post(
@@ -20,21 +17,21 @@ export const createUserRoute: FastifyPluginCallbackZod = (app) => {
     async (request, reply) => {
       const { name, email, password } = request.body
 
-      const existingUser = await db
-        .select({ id: schema.users.id })
-        .from(schema.users)
-        .where(eq(schema.users.email, email))
-        .limit(1)
+      const result = await useCases.createUser.execute({
+        name,
+        email,
+        password,
+      })
 
-      if (existingUser[0]) {
-        return reply.status(409).send({ message: 'Email já cadastrado' })
+      if (!result.ok) {
+        if (result.error === 'EMAIL_ALREADY_EXISTS') {
+          return reply.status(409).send({ message: 'Email já cadastrado' })
+        }
+
+        return reply.status(500).send({ message: 'Erro ao criar usuário' })
       }
 
-      const passwordHash = await hash(password, 10)
-
-      await db.insert(schema.users).values({ name, email, passwordHash })
-
-      return reply.status(201).send()
+      return reply.status(201).send({ userId: result.value.userId })
     }
   )
 }

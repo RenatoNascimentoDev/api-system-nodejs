@@ -48,4 +48,14 @@ app.register(getProfileRoute)
 app.register(uploadAvatarRoute)
 app.register(changePasswordRoute)
 
-app.listen({ port: env.PORT })
+const port = env.PORT
+
+app
+  .listen({ port })
+  .then(() => {
+    console.log(`🚀 Servidor rodando em http://localhost:${port}`)
+  })
+  .catch((error) => {
+    app.log.error(error)
+    process.exit(1)
+  })

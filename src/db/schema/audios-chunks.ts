@@ -9,5 +9,5 @@ export const audiosChunks = pgTable('audio_chunks', {
   transcription: text().notNull(),
   embeddings: vector({ dimensions: 768}).notNull(),
   createdAt: timestamp().defaultNow().notNull(),
-  durationSeconds: numeric().notNull(),
+  durationSeconds: numeric({ mode: 'number' }).notNull(),
 })
