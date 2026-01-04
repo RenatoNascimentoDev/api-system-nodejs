@@ -49,7 +49,7 @@ export const createSessionRoute: FastifyPluginCallbackZod = (app) => {
         user: {
           id: account.id,
           name: account.name,
-          email: account.email,
+          email: account.email
         },
       })
     }
