@@ -1,6 +1,6 @@
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod'
 import z from 'zod'
-import { useCases } from '../../config/container.ts'
+import { createUserController } from '../controllers/create-user-controller.ts'
 
 export const createUserRoute: FastifyPluginCallbackZod = (app) => {
   app.post(
@@ -14,24 +14,6 @@ export const createUserRoute: FastifyPluginCallbackZod = (app) => {
         }),
       },
     },
-    async (request, reply) => {
-      const { name, email, password } = request.body
-
-      const result = await useCases.createUser.execute({
-        name,
-        email,
-        password,
-      })
-
-      if (!result.ok) {
-        if (result.error === 'EMAIL_ALREADY_EXISTS') {
-          return reply.status(409).send({ message: 'Email já cadastrado' })
-        }
-
-        return reply.status(500).send({ message: 'Erro ao criar usuário' })
-      }
-
-      return reply.status(201).send({ userId: result.value.userId })
-    }
+    createUserController
   )
 }

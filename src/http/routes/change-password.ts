@@ -1,6 +1,6 @@
 import type { FastifyPluginCallbackZod } from 'fastify-type-provider-zod'
 import z from 'zod'
-import { useCases } from '../../config/container.ts'
+import { changePasswordController } from '../controllers/change-password-controller.ts'
 import { authenticate } from '../middleware/authenticate.ts'
 
 const passwordSchema = z
@@ -23,29 +23,6 @@ export const changePasswordRoute: FastifyPluginCallbackZod = (app) => {
         }),
       },
     },
-    async (request, reply) => {
-      const { currentPassword, newPassword } = request.body
-      const userId = request.user.sub
-
-      const result = await useCases.changePassword.execute({
-        userId,
-        currentPassword,
-        newPassword,
-      })
-
-      if (!result.ok) {
-        if (result.error === 'USER_NOT_FOUND') {
-          return reply.status(404).send({ message: 'Usuário não encontrado' })
-        }
-
-        if (result.error === 'INVALID_CURRENT_PASSWORD') {
-          return reply.status(401).send({ message: 'Senha atual incorreta' })
-        }
-
-        return reply.status(500).send({ message: 'Erro ao atualizar senha' })
-      }
-
-      return reply.send(result.value)
-    }
+    changePasswordController
   )
 }
